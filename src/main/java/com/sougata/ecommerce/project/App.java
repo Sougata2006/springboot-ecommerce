@@ -1,4 +1,4 @@
-package com.sougata.ecommerce;
+package com.sougata.ecommerce.project;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class App {
     @GetMapping("/hello")
     public String hello() {
-        return "Hello E-commerce";
+        return "Hello E-commerce ";
     }
 }

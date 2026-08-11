@@ -1,4 +1,4 @@
-package com.sougata.ecommerce;
+package com.sougata.ecommerce.project;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
