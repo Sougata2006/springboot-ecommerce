@@ -1,6 +1,7 @@
 package com.sougata.ecommerce.project.controller;
 
 import com.sougata.ecommerce.project.model.Category;
+import com.sougata.ecommerce.project.payload.CategoryDTO;
 import com.sougata.ecommerce.project.payload.CategoryResponse;
 import com.sougata.ecommerce.project.service.CategoryService;
 import jakarta.validation.Valid;
@@ -26,24 +27,24 @@ public class CategoryController {
     }
 
     @PostMapping("/public/categories")
-    public ResponseEntity<String> createCategory(@Valid @RequestBody Category category) {
-        categoryService.createCategory(category);
-        return new ResponseEntity<>("Category added successfully", HttpStatus.CREATED);
+    public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
+        CategoryDTO categoryDTOtoCreate = categoryService.createCategory(categoryDTO);
+        return new ResponseEntity<>(categoryDTOtoCreate, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/admin/categories/{categoryId}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long categoryId) {
 
-        String status = categoryService.deleteCategory(categoryId);
-        return new ResponseEntity<>(status, HttpStatus.OK);
+        CategoryDTO categoryDTO = categoryService.deleteCategory(categoryId);
+        return new ResponseEntity<>(categoryDTO, HttpStatus.OK);
 
     }
 
     @PutMapping("/public/categories/{categoryId}")
-    public ResponseEntity<String> updateCategory(@Valid @RequestBody Category category, @PathVariable Long categoryId) {
+    public ResponseEntity<CategoryDTO> updateCategory(@Valid @RequestBody CategoryDTO categoryDTO, @PathVariable Long categoryId) {
 
-        Category savedCategory = categoryService.updateCategory(category, categoryId);
-        return new ResponseEntity<>("Category with category Id " + categoryId + " updated successfully", HttpStatus.OK);
+        CategoryDTO savedCategoryDTO = categoryService.updateCategory(categoryDTO, categoryId);
+        return new ResponseEntity<>(savedCategoryDTO, HttpStatus.OK);
 
     }
 }

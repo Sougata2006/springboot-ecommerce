@@ -46,33 +46,43 @@ public class CategoryServiceImplementation implements CategoryService {
     }
 
     @Override
-    public void createCategory(Category category) {
-//        category.setCategoryId(nextId++); //As we have shifted to JpaRepo we do not need list increment anymore
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        Category category = modelMapper.map(categoryDTO, Category.class);
+
         Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
         if (savedCategory != null) {
-            throw new APIException("Category with category name " + category.getCategoryName() + " already exits !!");
+            throw new APIException("Category with category name " + savedCategory.getCategoryName() + " already exits !!");
         }
-        categoryRepository.save(category);
+        Category savedCategoryToConvert = categoryRepository.save(category);
+        CategoryDTO savedCategoryDTO = modelMapper.map(savedCategoryToConvert, CategoryDTO.class);
+        return savedCategoryDTO;
     }
 
     @Override
-    public String deleteCategory(Long categoryId) {
+    public CategoryDTO deleteCategory(Long categoryId) {
+
         Category category = categoryRepository.findById(categoryId).orElseThrow(() ->
                 new ResourceNotFoundException("Category", "CategoryId", categoryId));
 
         categoryRepository.delete(category);
-        return "Category with category id " + categoryId + " deleted successfully !!";
+
+        CategoryDTO categoryDTO = modelMapper.map(category, CategoryDTO.class);
+        return categoryDTO;
     }
 
     @Override
-    public Category updateCategory(Category category, Long categoryId) {
+    public CategoryDTO updateCategory(CategoryDTO categoryDTO, Long categoryId) {
 
-        Category savedCategory = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "CategoryId", categoryId));
-        ;
+        Category savedCategory = categoryRepository.findById(categoryId).orElseThrow(() ->
+                new ResourceNotFoundException("Category", "CategoryId", categoryId));
+
+        Category category = modelMapper.map(categoryDTO, Category.class);
 
         category.setCategoryId(categoryId);
 
         savedCategory = categoryRepository.save(category);
-        return savedCategory;
+
+        CategoryDTO categoryDTOToUpdate = modelMapper.map(savedCategory, CategoryDTO.class);
+        return categoryDTOToUpdate;
     }
 }
