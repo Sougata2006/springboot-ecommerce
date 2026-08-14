@@ -1,11 +1,12 @@
 package com.sougata.ecommerce.project.service;
 
 import com.sougata.ecommerce.project.model.Category;
+import com.sougata.ecommerce.project.payload.CategoryResponse;
 
 import java.util.List;
 
 public interface CategoryService {
-    List<Category> getALLCategories();
+    CategoryResponse getALLCategories();
 
     void createCategory(Category category);
 

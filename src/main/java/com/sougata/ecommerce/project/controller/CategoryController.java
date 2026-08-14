@@ -1,6 +1,7 @@
 package com.sougata.ecommerce.project.controller;
 
 import com.sougata.ecommerce.project.model.Category;
+import com.sougata.ecommerce.project.payload.CategoryResponse;
 import com.sougata.ecommerce.project.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,9 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping("/public/categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> allCategories = categoryService.getALLCategories();
-        return new ResponseEntity<>(allCategories, HttpStatus.OK);
+    public ResponseEntity<CategoryResponse> getAllCategories() {
+        CategoryResponse categoryResponse= categoryService.getALLCategories();
+        return new ResponseEntity<>(categoryResponse, HttpStatus.OK);
     }
 
     @PostMapping("/public/categories")
