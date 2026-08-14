@@ -5,7 +5,7 @@ import com.sougata.ecommerce.project.payload.CategoryDTO;
 import com.sougata.ecommerce.project.payload.CategoryResponse;
 
 public interface CategoryService {
-    CategoryResponse getALLCategories();
+    CategoryResponse getALLCategories(Integer pageNumber, Integer pageSize);
 
     CategoryDTO createCategory(CategoryDTO categoryDTO);
 

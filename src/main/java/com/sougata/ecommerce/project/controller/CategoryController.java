@@ -1,6 +1,5 @@
 package com.sougata.ecommerce.project.controller;
 
-import com.sougata.ecommerce.project.model.Category;
 import com.sougata.ecommerce.project.payload.CategoryDTO;
 import com.sougata.ecommerce.project.payload.CategoryResponse;
 import com.sougata.ecommerce.project.service.CategoryService;
@@ -10,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-//import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1") //This tells that all url in this class starts with /api/.....
@@ -21,8 +18,11 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping("/public/categories")
-    public ResponseEntity<CategoryResponse> getAllCategories() {
-        CategoryResponse categoryResponse= categoryService.getALLCategories();
+    public ResponseEntity<CategoryResponse> getAllCategories(
+            @RequestParam(name = "pageNumber") Integer pageNumber,
+            @RequestParam(name = "pageSize") Integer pageSize
+    ) {
+        CategoryResponse categoryResponse= categoryService.getALLCategories(pageNumber, pageSize);
         return new ResponseEntity<>(categoryResponse, HttpStatus.OK);
     }
 
