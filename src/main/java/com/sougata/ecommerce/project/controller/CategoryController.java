@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api") //This tells that all url in this class starts with /api/.....
+@RequestMapping("/api/v1") //This tells that all url in this class starts with /api/.....
 public class CategoryController {
 
     @Autowired
