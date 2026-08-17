@@ -101,4 +101,14 @@ public class ProductServiceImplementation implements ProductService{
 
         return productDTO;
     }
+
+    @Override
+    public ProductDTO deleteProduct(Long productId) {
+
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+        ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+        productRepository.delete(product);
+
+        return productDTO;
+    }
 }
