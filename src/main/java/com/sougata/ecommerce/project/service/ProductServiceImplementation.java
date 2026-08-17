@@ -1,5 +1,6 @@
 package com.sougata.ecommerce.project.service;
 
+import com.sougata.ecommerce.project.exceptions.APIException;
 import com.sougata.ecommerce.project.exceptions.ResourceNotFoundException;
 import com.sougata.ecommerce.project.model.Category;
 import com.sougata.ecommerce.project.model.Product;
@@ -40,15 +41,30 @@ public class ProductServiceImplementation implements ProductService{
         Category category = categoryRepository.findById(categoryId).orElseThrow(()
                 -> new ResourceNotFoundException("Category", "CategoryID", categoryId));
 
-        Product product = modelMapper.map(productDTO, Product.class);
+        boolean isProductNotPresent = true;
 
-        product.setImage("default.jpg");
-        product.setCategory(category);
-        double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
-        product.setSpecialPrice(specialPrice);
-        Product savedProduct = productRepository.save(product);
+        List<Product> products = category.getProducts();
+        for(int i=0; i<products.size(); i++){
+            if(products.get(i).getProductName().equals(productDTO.getProductName())){
+                isProductNotPresent = false;
+                break;
+            }
+        }
 
-        return modelMapper.map(savedProduct, ProductDTO.class);
+        if(isProductNotPresent){
+            Product product = modelMapper.map(productDTO, Product.class);
+
+            product.setImage("default.jpg");
+            product.setCategory(category);
+            double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
+            product.setSpecialPrice(specialPrice);
+            Product savedProduct = productRepository.save(product);
+
+            return modelMapper.map(savedProduct, ProductDTO.class);
+        }
+        else{
+            throw new APIException("Product already exists !!");
+        }
     }
 
     @Override
@@ -56,6 +72,10 @@ public class ProductServiceImplementation implements ProductService{
         List<Product> products = productRepository.findAll();
         List<ProductDTO> productDTOS = products.stream().map(product
                 -> modelMapper.map(product, ProductDTO.class)).toList();
+
+        if(productDTOS.isEmpty()){
+            throw new APIException("No products present till now !!");
+        }
 
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContent(productDTOS);
@@ -68,6 +88,10 @@ public class ProductServiceImplementation implements ProductService{
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(()
                 -> new ResourceNotFoundException("Category", "CategoryID", categoryId));
+
+        if(category.getProducts().isEmpty()){
+            throw new APIException("No products present till now in this category !!");
+        }
 
         List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);
         List<ProductDTO> productDTOS = products.stream().map(product
@@ -83,6 +107,11 @@ public class ProductServiceImplementation implements ProductService{
     public ProductResponse searchProductByKeyword(String keyword) {
 
         List<Product> products = productRepository.findByProductNameLikeIgnoreCase('%'+keyword+'%'); //'%' IS ESSENTIAL FOR PATTERN MATCHING FOR KEYWORD
+
+        if(products.isEmpty()){
+            throw new APIException("No products present till now with this keyword !!");
+        }
+
         List<ProductDTO> productDTOS = products.stream().map(product
                 -> modelMapper.map(product, ProductDTO.class)).toList();
 
@@ -117,6 +146,11 @@ public class ProductServiceImplementation implements ProductService{
     public ProductDTO deleteProduct(Long productId) {
 
         Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+        if(product.equals(null)){
+            throw new APIException("No products present with this id !!");
+        }
+
         ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
         productRepository.delete(product);
 
