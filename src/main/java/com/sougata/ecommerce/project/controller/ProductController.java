@@ -2,6 +2,7 @@ package com.sougata.ecommerce.project.controller;
 
 import com.sougata.ecommerce.project.model.Product;
 import com.sougata.ecommerce.project.payload.ProductDTO;
+import com.sougata.ecommerce.project.payload.ProductResponse;
 import com.sougata.ecommerce.project.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,5 +22,12 @@ public class ProductController {
         ProductDTO productDTO = productService.addProduct(categoryId, product);
         return new ResponseEntity<>(productDTO, HttpStatus.CREATED);
 
+    }
+
+    @GetMapping("/public/products")
+    public ResponseEntity<ProductResponse> getAllProducts(){
+        ProductResponse productResponse = productService.getAllProducts();
+
+        return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 }
