@@ -1,4 +1,8 @@
 package com.sougata.ecommerce.project.service;
 
+import com.sougata.ecommerce.project.model.Product;
+import com.sougata.ecommerce.project.payload.ProductDTO;
+
 public interface ProductService {
+    ProductDTO addProduct(Long categoryId, Product product);
 }
