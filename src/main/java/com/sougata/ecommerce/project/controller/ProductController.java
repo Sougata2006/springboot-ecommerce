@@ -1,6 +1,5 @@
 package com.sougata.ecommerce.project.controller;
 
-import com.sougata.ecommerce.project.model.Product;
 import com.sougata.ecommerce.project.payload.ProductDTO;
 import com.sougata.ecommerce.project.payload.ProductResponse;
 import com.sougata.ecommerce.project.service.ProductService;
@@ -17,10 +16,10 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping("/admin/categories/{categoryId}/product")
-    public ResponseEntity<ProductDTO> addProduct(@RequestBody Product product,@PathVariable Long categoryId){
+    public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO,@PathVariable Long categoryId){
 
-        ProductDTO productDTO = productService.addProduct(categoryId, product);
-        return new ResponseEntity<>(productDTO, HttpStatus.CREATED);
+        ProductDTO savedProductDTO = productService.addProduct(categoryId, productDTO);
+        return new ResponseEntity<>(savedProductDTO, HttpStatus.CREATED);
 
     }
 
@@ -48,8 +47,8 @@ public class ProductController {
     }
 
     @PutMapping("/admin/product/{productId}")
-    public ResponseEntity<ProductDTO> updateProduct(@RequestBody Product product, @PathVariable Long productId){
-        ProductDTO updatedProductDTO = productService.updateProduct(productId, product);
+    public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long productId){
+        ProductDTO updatedProductDTO = productService.updateProduct(productId, productDTO);
 
         return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
     }

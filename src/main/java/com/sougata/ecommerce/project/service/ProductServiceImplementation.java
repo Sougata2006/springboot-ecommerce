@@ -9,9 +9,7 @@ import com.sougata.ecommerce.project.repositories.CategoryRepository;
 import com.sougata.ecommerce.project.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,10 +26,12 @@ public class ProductServiceImplementation implements ProductService{
     ModelMapper modelMapper;
 
     @Override
-    public ProductDTO addProduct(Long categoryId, Product product) {
+    public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(()
                 -> new ResourceNotFoundException("Category", "CategoryID", categoryId));
+
+        Product product = modelMapper.map(productDTO, Product.class);
 
         product.setImage("default.jpg");
         product.setCategory(category);
@@ -84,9 +84,11 @@ public class ProductServiceImplementation implements ProductService{
     }
 
     @Override
-    public ProductDTO updateProduct(Long productId, Product product) {
+    public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
 
         Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product", "ProductId", productId));
+
+        Product product = modelMapper.map(productDTO, Product.class);
 
         existingProduct.setProductName(product.getProductName());
         existingProduct.setDescription(product.getDescription());
@@ -97,9 +99,9 @@ public class ProductServiceImplementation implements ProductService{
 
         Product savedProduct = productRepository.save(existingProduct);
 
-        ProductDTO productDTO = modelMapper.map(savedProduct, ProductDTO.class);
+        ProductDTO updatedProductDTO = modelMapper.map(savedProduct, ProductDTO.class);
 
-        return productDTO;
+        return updatedProductDTO;
     }
 
     @Override
