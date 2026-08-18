@@ -11,6 +11,10 @@ import com.sougata.ecommerce.project.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,8 +72,14 @@ public class ProductServiceImplementation implements ProductService{
     }
 
     @Override
-    public ProductResponse getAllProducts() {
-        List<Product> products = productRepository.findAll();
+    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("ascending")? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        Page<Product> pageProduct = productRepository.findAll(pageDetails);
+        List<Product> products = pageProduct.getContent();
+
         List<ProductDTO> productDTOS = products.stream().map(product
                 -> modelMapper.map(product, ProductDTO.class)).toList();
 
@@ -79,6 +89,12 @@ public class ProductServiceImplementation implements ProductService{
 
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContent(productDTOS);
+
+        productResponse.setPageNumber(pageProduct.getNumber());
+        productResponse.setPageSize(pageProduct.getSize());
+        productResponse.setTotalElements(pageProduct.getTotalElements());
+        productResponse.setTotalPages(pageProduct.getTotalPages());
+        productResponse.setLastPage(pageProduct.isLast());
 
         return productResponse;
     }
