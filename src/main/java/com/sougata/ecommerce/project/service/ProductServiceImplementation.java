@@ -77,8 +77,8 @@ public class ProductServiceImplementation implements ProductService{
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("ascending")? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
 
-        Page<Product> pageProduct = productRepository.findAll(pageDetails);
-        List<Product> products = pageProduct.getContent();
+        Page<Product> pageProducts = productRepository.findAll(pageDetails);
+        List<Product> products = pageProducts.getContent();
 
         List<ProductDTO> productDTOS = products.stream().map(product
                 -> modelMapper.map(product, ProductDTO.class)).toList();
@@ -90,39 +90,54 @@ public class ProductServiceImplementation implements ProductService{
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContent(productDTOS);
 
-        productResponse.setPageNumber(pageProduct.getNumber());
-        productResponse.setPageSize(pageProduct.getSize());
-        productResponse.setTotalElements(pageProduct.getTotalElements());
-        productResponse.setTotalPages(pageProduct.getTotalPages());
-        productResponse.setLastPage(pageProduct.isLast());
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
 
         return productResponse;
     }
 
     @Override
-    public ProductResponse searchByCategory(Long categoryId) {
+    public ProductResponse searchByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(()
                 -> new ResourceNotFoundException("Category", "CategoryID", categoryId));
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("ascending")? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        Page<Product> pageProducts = productRepository.findByCategoryOrderByPriceAsc(category, pageDetails);
+        List<Product> products = pageProducts.getContent();
 
         if(category.getProducts().isEmpty()){
             throw new APIException("No products present till now in this category !!");
         }
 
-        List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);
         List<ProductDTO> productDTOS = products.stream().map(product
                 -> modelMapper.map(product, ProductDTO.class)).toList();
 
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContent(productDTOS);
 
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
+
         return productResponse;
     }
 
     @Override
-    public ProductResponse searchProductByKeyword(String keyword) {
+    public ProductResponse searchProductByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
 
-        List<Product> products = productRepository.findByProductNameLikeIgnoreCase('%'+keyword+'%'); //'%' IS ESSENTIAL FOR PATTERN MATCHING FOR KEYWORD
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("ascending")? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        Page<Product> pageProducts = productRepository.findByProductNameLikeIgnoreCase('%'+keyword+'%', pageDetails); //'%' IS ESSENTIAL FOR PATTERN MATCHING FOR KEYWORD
+        List<Product> products = pageProducts.getContent();
 
         if(products.isEmpty()){
             throw new APIException("No products present till now with this keyword !!");
@@ -133,6 +148,12 @@ public class ProductServiceImplementation implements ProductService{
 
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContent(productDTOS);
+
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
 
         return productResponse;
     }
