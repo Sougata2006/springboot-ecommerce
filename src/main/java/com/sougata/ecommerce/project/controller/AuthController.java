@@ -24,10 +24,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -68,7 +70,7 @@ public class AuthController {
 
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        UserInfoResponse loginResponse = new UserInfoResponse(userDetails.getId(), userDetails.getUsername(),jwtToken, roles);
+        UserInfoResponse loginResponse = new UserInfoResponse(userDetails.getId(), jwtToken, userDetails.getUsername(), roles);
 
         return ResponseEntity.ok(loginResponse);
     }
@@ -82,7 +84,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error : This email already exists!!"));
         }
 
-        User user = new User(signupRequest.getUsername(), encoder.encode(signupRequest.getPassword()), signupRequest.getEmail());
+        User user = new User(signupRequest.getUsername(), signupRequest.getEmail(), encoder.encode(signupRequest.getPassword()));
 
         Set<String> strRoles = signupRequest.getRole();
         Set<Role> roles = new HashSet<>();
