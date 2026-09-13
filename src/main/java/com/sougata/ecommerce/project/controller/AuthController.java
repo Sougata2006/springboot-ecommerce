@@ -3,6 +3,7 @@ package com.sougata.ecommerce.project.controller;
 import com.sougata.ecommerce.project.model.AppRole;
 import com.sougata.ecommerce.project.model.Role;
 import com.sougata.ecommerce.project.model.User;
+import com.sougata.ecommerce.project.repositories.RoleRepository;
 import com.sougata.ecommerce.project.repositories.UserRepository;
 import com.sougata.ecommerce.project.security.jwt.JwtUtils;
 import com.sougata.ecommerce.project.security.jwt.response.MessageResponse;
