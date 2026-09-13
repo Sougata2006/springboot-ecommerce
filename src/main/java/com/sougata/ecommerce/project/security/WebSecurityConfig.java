@@ -92,7 +92,7 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
-        return web -> web.ignoring().requestMatchers("/V2/api-docs","/configuration/ui", "webjars/**", "/configuration.security", "swagger-ui.html");
+        return web -> web.ignoring().requestMatchers("/V2/api-docs","/configuration/ui", "/webjars/**", "/configuration.security", "/swagger-ui.html");
     }
 
     //FilerChain is managed by spring security when request comes it check and then permit the permissions
