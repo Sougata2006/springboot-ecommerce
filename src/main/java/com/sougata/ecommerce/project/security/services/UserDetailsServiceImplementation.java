@@ -1,6 +1,7 @@
 package com.sougata.ecommerce.project.security.services;
 
 import com.sougata.ecommerce.project.model.User;
+import com.sougata.ecommerce.project.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
