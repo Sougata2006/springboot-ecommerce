@@ -10,6 +10,7 @@ import com.sougata.ecommerce.project.payload.ProductDTO;
 import com.sougata.ecommerce.project.repositories.CartItemRepository;
 import com.sougata.ecommerce.project.repositories.CartRepository;
 import com.sougata.ecommerce.project.repositories.ProductRepository;
+import com.sougata.ecommerce.project.utils.AuthUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,10 @@ public class CartServiceImplementation implements CartService{
 
         cartItemRepository.save(newCartItem);
 
-        product.setQuantity(product.getQuantity());
+        cart.getCartItems().add(newCartItem);
+
+        product.setQuantity(product.getQuantity() - quantity);
+        productRepository.save(product);
 
         cart.setTotalPrice(cart.getTotalPrice() + (product.getSpecialPrice() * quantity));
         cartRepository.save(cart);
@@ -93,7 +97,7 @@ public class CartServiceImplementation implements CartService{
 
         Cart cart = new Cart();
         cart.setTotalPrice(0.00);
-        cart.setUser(authUtil.loggedInUser);
+        cart.setUser(authUtil.loggedInUser());
 
         Cart newCart = cartRepository.save(cart);
 
