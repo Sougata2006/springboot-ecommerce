@@ -99,6 +99,7 @@ public class CartServiceImplementation implements CartService{
         List<CartDTO> cartDTOs = carts.stream().map(
                 cart -> {
                     CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+                    cart.getCartItems().forEach(c -> c.getProduct().setQuantity(c.getQuantity()));
                     List<ProductDTO> productDTOs = cart.getCartItems().stream().map(p -> modelMapper.map(
                             p.getProduct(), ProductDTO.class
                     )).toList();
@@ -142,8 +143,9 @@ public class CartServiceImplementation implements CartService{
         if(product.getQuantity() == 0){
             throw new APIException(product.getProductName() + "is not available !!");
         }
+
         if(product.getQuantity() < quantity){
-            throw new APIException("This much item not present please choose within "+ product.getQuantity());
+            throw new APIException("Only " + product.getQuantity() + " items are available");
         }
 
         CartItem cartItem =cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
@@ -151,9 +153,22 @@ public class CartServiceImplementation implements CartService{
             throw new APIException("Product "+product.getProductName()+" not available in cart!!");
         }
 
+        Integer newQuantity = cartItem.getQuantity() + quantity;
+
+        if (newQuantity < 0) {
+            throw new APIException("Cart quantity cannot be negative");
+        }
+
+        if (newQuantity > product.getQuantity()) {
+            throw new APIException(
+                    "Only " + product.getQuantity() + " items are available"
+            );
+        }
+
         cartItem.setProductPrice(product.getSpecialPrice());
-        cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        cartItem.setQuantity(newQuantity);
         cartItem.setDiscount(product.getDiscount());
+
         cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice()*quantity));
         cartRepository.save(cart);
 
@@ -176,6 +191,7 @@ public class CartServiceImplementation implements CartService{
         return cartDTO;
     }
 
+    @Transactional
     @Override
     public String deleteProductFromCart(Long cartId, Long productId) {
 
