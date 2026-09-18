@@ -16,7 +16,7 @@ public class AuthUtil {
     private UserRepository userRepository;
 
     public String loggedInEmail(){
-        return loggedInUser().getUserName();
+        return loggedInUser().getEmail();
     }
 
     public Long loggedInUserId(){
