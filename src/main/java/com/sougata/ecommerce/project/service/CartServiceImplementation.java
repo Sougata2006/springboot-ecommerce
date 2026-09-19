@@ -149,11 +149,19 @@ public class CartServiceImplementation implements CartService{
         }
 
         CartItem cartItem =cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
         if(cartItem == null){
             throw new APIException("Product "+product.getProductName()+" not available in cart!!");
         }
 
         Integer newQuantity = cartItem.getQuantity() + quantity;
+
+        System.out.println("========== CART DEBUG ==========");
+        System.out.println("Product stock: " + product.getQuantity());
+        System.out.println("Cart quantity: " + cartItem.getQuantity());
+        System.out.println("Requested change: " + quantity);
+        System.out.println("New quantity: " + newQuantity);
+        System.out.println("================================");
 
         if (newQuantity < 0) {
             throw new APIException("Cart quantity cannot be negative");
@@ -165,24 +173,24 @@ public class CartServiceImplementation implements CartService{
             );
         }
 
-        cartItem.setProductPrice(product.getSpecialPrice());
-        cartItem.setQuantity(newQuantity);
-        cartItem.setDiscount(product.getDiscount());
-
-        cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice()*quantity));
-        cartRepository.save(cart);
-
-        CartItem updatedItem = cartItemRepository.save(cartItem);
-        if(updatedItem.getQuantity() == 0){
-            cartItemRepository.deleteById(updatedItem.getCartItemId());
+        if (newQuantity == 0){
+            deleteProductFromCart(cartId, productId);
+        } else {
+            cartItem.setProductPrice(product.getSpecialPrice());
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            cartItem.setDiscount(product.getDiscount());
+            cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice() * quantity));
+            cartRepository.save(cart);
         }
 
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
         List<CartItem> cartItems = cart.getCartItems();
 
         Stream<ProductDTO> productDTOStream = cartItems.stream().map(item -> {
-            ProductDTO productDTO = modelMapper.map(item.getProduct(), ProductDTO.class);
-            product.setQuantity(item.getQuantity());
+            ProductDTO productDTO =
+                    modelMapper.map(item.getProduct(), ProductDTO.class);
+
+            productDTO.setQuantity(item.getQuantity());
 
             return productDTO;
         });
