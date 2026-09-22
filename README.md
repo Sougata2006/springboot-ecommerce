@@ -5,8 +5,8 @@
 ![Java](https://img.shields.io/badge/Java-25-orange?style=flat-square&logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen?style=flat-square&logo=springboot)
 ![Status](https://img.shields.io/badge/Status-In%20Progress-yellow?style=flat-square)
-![Commits](https://img.shields.io/badge/Commits-40%2B-blue?style=flat-square&logo=github)
-![Day](https://img.shields.io/badge/Learning%20Day-7+-purple?style=flat-square)
+![Commits](https://img.shields.io/badge/Commits-75%2B-blue?style=flat-square&logo=github)
+![Day](https://img.shields.io/badge/Learning%20Day-40+-purple?style=flat-square)
 
 > A hands-on e-commerce backend built while learning **Spring** and **Spring Boot** from the ground up — every concept learned is immediately implemented here, turning theory into a real, structured, production-style project.
 
