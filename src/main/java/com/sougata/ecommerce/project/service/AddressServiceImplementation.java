@@ -1,5 +1,6 @@
 package com.sougata.ecommerce.project.service;
 
+import com.sougata.ecommerce.project.exceptions.ResourceNotFoundException;
 import com.sougata.ecommerce.project.model.Address;
 import com.sougata.ecommerce.project.model.User;
 import com.sougata.ecommerce.project.payload.AddressDTO;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AddressServiceImplementation implements AddressService{
@@ -46,4 +46,16 @@ public class AddressServiceImplementation implements AddressService{
 
         return addressDTOs;
     }
+
+    @Override
+    public AddressDTO findById(Long addressId) {
+
+        Address address = addressRepository.findById(addressId).orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
+
+        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
+
+        return addressDTO;
+    }
+
+
 }

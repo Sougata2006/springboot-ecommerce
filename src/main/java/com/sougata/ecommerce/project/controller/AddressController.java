@@ -1,5 +1,6 @@
 package com.sougata.ecommerce.project.controller;
 
+import com.sougata.ecommerce.project.model.Address;
 import com.sougata.ecommerce.project.model.User;
 import com.sougata.ecommerce.project.payload.AddressDTO;
 import com.sougata.ecommerce.project.service.AddressService;
@@ -38,5 +39,13 @@ public class AddressController {
         List<AddressDTO> addressList = addressService.getAddresses();
 
         return new ResponseEntity<>(addressList, HttpStatus.OK);
+    }
+
+    @GetMapping("/addresses/{addressId}")
+    public ResponseEntity<AddressDTO> getAddressById(@Valid @PathVariable Long addressId){
+
+        AddressDTO address = addressService.findById(addressId);
+
+        return new ResponseEntity<>(address, HttpStatus.OK);
     }
 }
