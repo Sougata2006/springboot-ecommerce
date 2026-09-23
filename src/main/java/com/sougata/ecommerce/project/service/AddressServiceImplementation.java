@@ -42,9 +42,8 @@ public class AddressServiceImplementation implements AddressService{
     public List<AddressDTO> getAddresses() {
 
         List<Address> addresses = addressRepository.findAll();
-        List<AddressDTO> addressDTOs = addresses.stream().map(address -> modelMapper.map(address, AddressDTO.class)).toList();
 
-        return addressDTOs;
+        return addresses.stream().map(address -> modelMapper.map(address, AddressDTO.class)).toList();
     }
 
     @Override
@@ -55,6 +54,14 @@ public class AddressServiceImplementation implements AddressService{
         AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
 
         return addressDTO;
+    }
+
+    @Override
+    public List<AddressDTO> getUserAddresses(User user) {
+
+        List<Address> addresses = user.getAddresses();
+
+        return addresses.stream().map(a -> modelMapper.map(a, AddressDTO.class)).toList();
     }
 
 
