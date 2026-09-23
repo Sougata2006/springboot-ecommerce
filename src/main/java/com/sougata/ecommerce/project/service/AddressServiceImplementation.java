@@ -5,6 +5,7 @@ import com.sougata.ecommerce.project.model.Address;
 import com.sougata.ecommerce.project.model.User;
 import com.sougata.ecommerce.project.payload.AddressDTO;
 import com.sougata.ecommerce.project.repositories.AddressRepository;
+import com.sougata.ecommerce.project.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class AddressServiceImplementation implements AddressService{
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Override
@@ -62,6 +66,28 @@ public class AddressServiceImplementation implements AddressService{
         List<Address> addresses = user.getAddresses();
 
         return addresses.stream().map(a -> modelMapper.map(a, AddressDTO.class)).toList();
+    }
+
+    @Override
+    public AddressDTO updateAddressById(Long addressId, AddressDTO addressDTO) {
+
+        Address address = addressRepository.findById(addressId).orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
+
+        address.setBuildingName(addressDTO.getBuildingName());
+        address.setCity(addressDTO.getCity());
+        address.setCountry(addressDTO.getCountry());
+        address.setPinCode(addressDTO.getPinCode());
+        address.setStreet(addressDTO.getStreet());
+        address.setState(addressDTO.getState());
+
+        Address updatedAddress = addressRepository.save(address);
+
+        User user = address.getUser();
+        user.getAddresses().removeIf(a -> address.getAddressId().equals(addressId));
+        user.getAddresses().add(updatedAddress);
+        userRepository.save(user);
+
+        return modelMapper.map(address, AddressDTO.class);
     }
 
 
