@@ -66,4 +66,12 @@ public class AddressController {
 
         return new ResponseEntity<>(updartedAddress, HttpStatus.OK);
     }
+
+    @DeleteMapping("addresses/{addressId}")
+    public ResponseEntity<String> deleteCategory(@PathVariable Long addressId){
+
+        addressService.deleteCategory(addressId);
+
+        return new ResponseEntity<>("Address with id "+ addressId+" has been deleted successfully !!", HttpStatus.OK);
+    }
 }
