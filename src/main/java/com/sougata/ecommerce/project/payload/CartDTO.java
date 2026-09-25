@@ -1,6 +1,5 @@
 package com.sougata.ecommerce.project.payload;
 
-import com.sougata.ecommerce.project.model.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
