@@ -1,11 +1,9 @@
 package com.sougata.ecommerce.project.controller;
 
-import com.sougata.ecommerce.project.model.Address;
 import com.sougata.ecommerce.project.model.User;
 import com.sougata.ecommerce.project.payload.AddressDTO;
 import com.sougata.ecommerce.project.service.AddressService;
 import com.sougata.ecommerce.project.utils.AuthUtil;
-import com.sun.net.httpserver.HttpsServer;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
