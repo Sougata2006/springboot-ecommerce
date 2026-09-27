@@ -28,9 +28,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<OrderItem> orderItems = new ArrayList<>();
 
-//    @OneToOne
-//    @JoinColumn(name = "payment_id")
-//    private Payment payment;
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 
     private LocalDate orderDate;
 
