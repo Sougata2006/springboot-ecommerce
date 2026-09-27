@@ -25,12 +25,12 @@ public class Payment {
     @Size(min = 4, message = "Payment method must contain at least 4 characters!!")
     private String paymentMethod;
 
-    private Long pgPaymentId;
+    private String pgPaymentId;
     private String pgStatus;
     private String pgResponseMessage;
     private String pgName;
 
-    public Payment(Long pgPaymentId, String paymentMethod, String pgStatus, String pgResponseMessage, String pgName){
+    public Payment(String pgPaymentId, String paymentMethod, String pgStatus, String pgResponseMessage, String pgName){
         this.paymentMethod = paymentMethod;
         this.pgPaymentId = pgPaymentId;
         this.pgStatus = pgStatus;

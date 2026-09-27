@@ -9,11 +9,13 @@ import com.sougata.ecommerce.project.repositories.*;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class OrderServiceImplementation implements OrderService{
 
     @Autowired
@@ -42,7 +44,7 @@ public class OrderServiceImplementation implements OrderService{
 
     @Override
     @Transactional
-    public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgName, Long pgPaymentId, String pgStatus, String pgResponseMessage) {
+    public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgName, String pgPaymentId, String pgStatus, String pgResponseMessage) {
 
         Cart cart = cartRepository.findCartByEmail(emailId);
         if(cart == null){
@@ -78,20 +80,20 @@ public class OrderServiceImplementation implements OrderService{
             orderItem.setOrderedProductPrice(cartItem.getProductPrice());
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setProduct(cartItem.getProduct());
-            orderItem.setOrderItemId(cartItem.getCartItemId());
             orderItems.add(orderItem);
         }
 
         orderItems = orderItemRepository.saveAll(orderItems);
 
-        cart.getCartItems().forEach(item -> {
-            int quantity = item.getQuantity();
-            Product product = item.getProduct();
-            product.setQuantity(product.getQuantity() - quantity);
-            productRepository.save(product);
+        List<CartItem> newCartItems = new ArrayList<>(cart.getCartItems());
 
-            cartService.deleteProductFromCart(cart.getCartId(), item.getProduct().getProductId());
-        });
+        for (CartItem item : newCartItems) {
+
+            cartService.deleteProductFromCart(
+                    cart.getCartId(),
+                    item.getProduct().getProductId()
+            );
+        }
 
         OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
         orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
