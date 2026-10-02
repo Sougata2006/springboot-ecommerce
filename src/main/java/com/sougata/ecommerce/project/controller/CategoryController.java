@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/v1") //This tells that all url in this class starts with /api/.....
+@RequestMapping("/api/v1")
 public class CategoryController {
 
     @Autowired

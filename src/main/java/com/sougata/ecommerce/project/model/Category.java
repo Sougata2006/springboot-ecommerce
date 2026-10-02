@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-//(Note) - We can also use 'record' in class to avoid lambok dependency
 public class Category {
 
     @Id
