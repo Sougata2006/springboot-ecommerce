@@ -645,7 +645,7 @@ Stages above the "Testing infrastructure" line are implemented; stages marked **
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 ### 📚 Swagger / API Documentation
 
