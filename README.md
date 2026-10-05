@@ -2,13 +2,14 @@
 
 [![Java](https://img.shields.io/badge/Java-25-orange?style=flat-square&logo=openjdk)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%20(RDS)-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![JWT](https://img.shields.io/badge/Auth-JWT-black?style=flat-square&logo=jsonwebtokens)](https://jwt.io/)
+[![AWS](https://img.shields.io/badge/Deployed%20on-AWS%20Elastic%20Beanstalk-FF9900?style=flat-square&logo=amazonaws)](https://aws.amazon.com/elasticbeanstalk/)
 [![Status](https://img.shields.io/badge/Status-Actively%20Developed-yellow?style=flat-square)]()
 
-A layered, RESTful e-commerce backend built with Spring Boot, developed as a hands-on learning project and evolved incrementally over 100+ structured commits. The project implements stateless JWT authentication, role-based authorization, catalog management, cart and inventory logic, address management, and a transactional order placement workflow, backed by PostgreSQL.
+A layered, RESTful e-commerce backend built with Spring Boot, developed as a hands-on learning project and evolved incrementally over 100+ structured commits. The project implements stateless JWT authentication, role-based authorization, catalog management, cart and inventory logic, address management, and a transactional order placement workflow, backed by PostgreSQL, and is deployed on AWS.
 
-This README documents the current, actually-implemented state of the project. Planned work (Docker, AWS deployment, external payment gateway integration) is explicitly marked as planned and not represented as complete.
+This README documents the current, actually-implemented state of the project. Planned work (a frontend client, and a real external payment gateway) is explicitly marked as planned and not represented as complete.
 
 ---
 
@@ -31,7 +32,7 @@ This README documents the current, actually-implemented state of the project. Pl
 15. [Testing](#testing)
 16. [API Reference](#api-reference)
 17. [Configuration & Local Setup](#configuration--local-setup)
-18. [Deployment Roadmap](#deployment-roadmap)
+18. [Deployment](#deployment)
 19. [Engineering Challenges](#engineering-challenges)
 20. [Key Design Decisions](#key-design-decisions)
 21. [Development Journey](#development-journey)
@@ -42,7 +43,7 @@ This README documents the current, actually-implemented state of the project. Pl
 
 ## Overview
 
-This project started as a simple Category/Product CRUD application and was built up incrementally into a more complete backend as new Spring concepts were learned and applied directly to the codebase:
+This project started as a simple Category/Product CRUD application and was built up incrementally into a more complete, deployed backend as new Spring concepts were learned and applied directly to the codebase:
 
 - Core REST APIs with layered architecture
 - JPA/Hibernate persistence
@@ -58,8 +59,9 @@ This project started as a simple Category/Product CRUD application and was built
 - Migration to PostgreSQL
 - API documentation via Swagger/OpenAPI (including JWT-protected endpoint testing)
 - Application monitoring via Spring Boot Actuator
+- Deployment to AWS (Elastic Beanstalk, EC2, RDS)
 
-Docker and AWS deployment are the next planned phase and are **not yet implemented** (see [Deployment Roadmap](#deployment-roadmap)).
+A frontend client and real external payment gateway integration are the next planned phase and are **not yet implemented** (see [Deployment](#deployment)). This project does not use Docker/containerization — the Spring Boot application is deployed directly to Elastic Beanstalk as a packaged JAR.
 
 ---
 
@@ -72,7 +74,7 @@ Docker and AWS deployment are the next planned phase and are **not yet implement
 | Web | Spring Web MVC |
 | Security | Spring Security, JWT (JJWT) |
 | Persistence | Spring Data JPA, Hibernate |
-| Database | PostgreSQL |
+| Database | PostgreSQL (Amazon RDS) |
 | Object Mapping | ModelMapper 3.2.6 |
 | Validation | Jakarta/Spring Validation |
 | API Documentation | SpringDoc OpenAPI (Swagger UI) |
@@ -80,6 +82,7 @@ Docker and AWS deployment are the next planned phase and are **not yet implement
 | Boilerplate Reduction | Lombok |
 | Testing | Spring Boot Test, Spring Security Test |
 | Build Tool | Maven |
+| Deployment | AWS Elastic Beanstalk (EC2) |
 
 ### Key Dependencies
 
@@ -89,18 +92,19 @@ Docker and AWS deployment are the next planned phase and are **not yet implement
 
 ## Architecture
 
-The project follows a standard layered architecture. Incoming requests pass through a JWT authentication filter before reaching the controller layer, and controllers delegate to service interfaces, which are backed by service implementations that handle business logic and delegate persistence to Spring Data JPA repositories.
+The project follows a standard layered architecture. Incoming requests pass through a JWT authentication filter before reaching the controller layer, and controllers delegate to service interfaces, which are backed by service implementations that handle business logic and delegate persistence to Spring Data JPA repositories. In production, the application runs on an EC2 instance managed by Elastic Beanstalk and connects to a PostgreSQL database hosted on Amazon RDS.
 
 ```mermaid
 graph TD
-    Client[Client] -->|HTTP Request| Filter[JWT Authentication Filter]
+    Client[Client] -->|HTTPS Request| EB[AWS Elastic Beanstalk - EC2]
+    EB --> Filter[JWT Authentication Filter]
     Filter -->|Public endpoint or valid token| Controller[Controller Layer]
     Filter -->|Missing/invalid token| EntryPoint[AuthEntryPointJwt - 401 Unauthorized]
     Controller --> SvcI[Service Interface]
     SvcI --> SvcImpl[Service Implementation]
     SvcImpl -->|ModelMapper| DTO[DTO / Payload Layer]
     SvcImpl --> Repo[Repository - Spring Data JPA]
-    Repo --> DB[(PostgreSQL)]
+    Repo --> RDS[(Amazon RDS - PostgreSQL)]
     SvcImpl --> Exc[Custom Exceptions]
     Exc --> GEH[GlobalExceptionHandler]
     GEH -->|Structured error response| Controller
@@ -139,7 +143,7 @@ com.sougata.ecommerce.project
 
 ## Authentication & Security
 
-The project implements **stateless JWT authentication** using Spring Security rather than session-based authentication, which avoids server-side session state and scales more naturally across multiple backend instances.
+The project implements **stateless JWT authentication** using Spring Security rather than session-based authentication, which avoids server-side session state and scales more naturally across multiple backend instances — relevant now that the app runs on EC2 behind Elastic Beanstalk, which can scale to multiple instances.
 
 Implemented components and concepts:
 
@@ -162,7 +166,7 @@ spring.app.jwtExpirationMs=86400000
 spring.datasource.password=${DB_SECRET}
 ```
 
-This matters for a few reasons: committing secrets to a Git repository exposes them permanently in version history (even if later removed), environment-based configuration allows different secrets per environment (local, staging, production) without code changes, and it prevents credentials from being visible to anyone with read access to the repository, including on a public GitHub project like this one.
+In production, these are set as environment properties in the Elastic Beanstalk environment configuration rather than in any file checked into Git. This matters for a few reasons: committing secrets to a Git repository exposes them permanently in version history (even if later removed), environment-based configuration allows different secrets per environment (local, staging, production) without code changes, and it prevents credentials from being visible to anyone with read access to the repository, including on a public GitHub project like this one.
 
 ---
 
@@ -195,7 +199,7 @@ This separation provides:
 - **Decoupling** of the API contract from the database schema, so internal model changes don't automatically break clients
 - **Controlled payloads** — only the fields that should be exposed are exposed (e.g., not leaking internal flags or full relationship graphs)
 - **Reduced coupling** between persistence and presentation concerns
-- **Easier API evolution** — a DTO can be versioned or extended independently of the underlying entity
+- **Easier API evolution** — a DTO can be versioned or extended independently of the underlying entity, which matters once a frontend client depends on this API
 
 ---
 
@@ -274,7 +278,7 @@ This workflow is wrapped in `@Transactional`. Order placement touches multiple t
 
 ## Database
 
-The project currently uses **PostgreSQL**. During development, the data layer progressed through H2 → MySQL → PostgreSQL as part of learning how Spring Data JPA abstracts persistence concerns. Because the service and repository layers are written against JPA/Hibernate rather than database-specific APIs, migrating between databases was largely a matter of changing the datasource configuration and driver dependency, with the persistence and service architecture staying intact.
+The project currently uses **PostgreSQL**, hosted on **Amazon RDS** in production. During development, the data layer progressed through H2 → MySQL → PostgreSQL as part of learning how Spring Data JPA abstracts persistence concerns. Because the service and repository layers are written against JPA/Hibernate rather than database-specific APIs, migrating between databases — and later pointing the application at a managed RDS instance instead of a local database — was largely a matter of changing the datasource configuration and driver dependency, with the persistence and service architecture staying intact.
 
 ### Core Entities
 
@@ -489,7 +493,7 @@ GET /api/v1/public/categories/1/products?pageNumber=0&pageSize=5&sortBy=productI
 
 ### Environment Variables
 
-Secrets are **not** stored in `application.properties`. Instead, set the following environment variables before running the application:
+Secrets are **not** stored in `application.properties`. Instead, set the following environment variables before running the application (locally) — or as Elastic Beanstalk environment properties (in production):
 
 | Variable | Purpose |
 |---|---|
@@ -533,16 +537,26 @@ The application runs on `http://localhost:8080` by default. Swagger UI is availa
 
 ---
 
-## Deployment Roadmap
+## Deployment
+
+The backend is deployed on **AWS**:
+
+| Component | Service |
+|---|---|
+| Application hosting | AWS Elastic Beanstalk |
+| Compute | EC2 (managed by Elastic Beanstalk) |
+| Database | Amazon RDS (PostgreSQL) |
+
+The Spring Boot application is deployed as a packaged JAR directly to Elastic Beanstalk — **no Docker/containerization is used** in this project. Database credentials and the JWT secret are configured as environment properties on the Elastic Beanstalk environment rather than committed to source control.
+
+### Roadmap
 
 | Stage | Status | Notes |
 |---|---|---|
-| Local development with PostgreSQL | Completed | Current state of the project |
-| Dockerization | Planned | Containerize the application for portable, repeatable deployment |
-| AWS deployment | Planned | Deploy to AWS as a cloud infrastructure learning exercise |
-| Render (or similar) hosting | Planned | For a persistent, always-on portfolio deployment |
-
-No live deployment URL currently exists for this project.
+| Local development with PostgreSQL | Completed | Initial development environment |
+| AWS deployment (Elastic Beanstalk + EC2, RDS PostgreSQL) | Completed | Current production setup |
+| Frontend client | Planned | Next major phase of the project |
+| External payment gateway integration | Planned | e.g. Razorpay/Stripe — not currently implemented |
 
 ---
 
@@ -561,6 +575,8 @@ Practical implementation and debugging challenges encountered while building thi
 - Moving hardcoded secrets into environment-variable-based configuration
 - Configuring JWT bearer authentication within Swagger UI
 - Resolving validation constraint issues on nested/related fields
+- Setting up an Amazon RDS PostgreSQL instance and connecting to it securely from Elastic Beanstalk
+- Configuring the Elastic Beanstalk environment (environment properties, security groups) for a Spring Boot JAR deployment
 - General Git/GitHub workflow issues (branching, syncing) while maintaining 100+ incremental commits
 
 ---
@@ -570,18 +586,19 @@ Practical implementation and debugging challenges encountered while building thi
 | Decision | Rationale |
 |---|---|
 | Layered architecture (Controller → Service → Repository) | Separates HTTP handling, business logic, and persistence, making each layer independently testable and easier to reason about. |
-| DTO-based API contracts | Decouples the public API shape from internal persistence entities, enabling schema changes without breaking clients. |
-| Stateless JWT authentication | Avoids server-side session storage and scales naturally if the application is later deployed behind multiple instances. |
+| DTO-based API contracts | Decouples the public API shape from internal persistence entities, enabling schema changes without breaking clients — including the planned frontend. |
+| Stateless JWT authentication | Avoids server-side session storage and scales naturally across multiple EC2 instances behind Elastic Beanstalk. |
 | BCrypt password hashing | Standard, adaptive one-way hashing for credential storage; resistant to rainbow-table attacks. |
 | Role-based authorization | Restricts sensitive operations (e.g., product/category management) to appropriate roles rather than all authenticated users. |
-| JPA/Hibernate persistence | Abstracts away database-specific SQL, which simplified the H2 → MySQL → PostgreSQL migration. |
-| PostgreSQL | A production-grade relational database suitable for the relational structure of the catalog/cart/order domain. |
-| Environment-based secrets | Keeps credentials and signing keys out of source control. |
-| API versioning (`/api/v1/...`) | Allows future breaking changes without disrupting existing API consumers. |
+| JPA/Hibernate persistence | Abstracts away database-specific SQL, which simplified the H2 → MySQL → PostgreSQL migration and the later move to RDS. |
+| PostgreSQL on Amazon RDS | A managed, production-grade relational database suitable for the relational structure of the catalog/cart/order domain, without self-managing database infrastructure. |
+| Environment-based secrets | Keeps credentials and signing keys out of source control, configured instead via Elastic Beanstalk environment properties in production. |
+| API versioning (`/api/v1/...`) | Allows future breaking changes without disrupting existing API consumers, including an upcoming frontend. |
 | `@Transactional` order placement | Guarantees the multi-step order workflow either fully succeeds or fully rolls back. |
 | Centralized exception handling | Produces consistent, structured error responses instead of leaking stack traces or default error pages. |
 | Pagination and sorting | Keeps list endpoints performant and usable as data volume grows. |
 | ModelMapper | Reduces repetitive manual mapping code between entities and DTOs. |
+| AWS Elastic Beanstalk (no Docker) | Deploys the Spring Boot JAR directly to a managed EC2 environment, avoiding the added complexity of containerization for the current stage of the project. |
 
 ---
 
@@ -620,14 +637,14 @@ Actuator Monitoring
         ↓
 Testing infrastructure (Spring Boot Test / Spring Security Test)
         ↓
-[Planned] Dockerization
+AWS Deployment (Elastic Beanstalk + EC2, RDS PostgreSQL)
         ↓
-[Planned] AWS Deployment
+[Planned] Frontend client
         ↓
-[Planned] Render / portfolio hosting
+[Planned] External payment gateway integration
 ```
 
-Stages above the "Testing infrastructure" line are implemented; stages marked **[Planned]** are future work.
+Stages above the "AWS Deployment" line are implemented; stages marked **[Planned]** are future work. Docker is not part of this project's deployment path.
 
 ---
 
@@ -640,7 +657,8 @@ Stages above the "Testing infrastructure" line are implemented; stages marked **
 - Implemented a transactional order placement workflow spanning cart, address, payment, and order-item creation with rollback safety
 - Added centralized exception handling, bean validation, pagination, dynamic sorting, and keyword search across catalog endpoints
 - Integrated SpringDoc OpenAPI (Swagger UI) with JWT-secured endpoint testing, and Spring Boot Actuator for basic monitoring
-- Externalized all secrets (DB credentials, JWT signing key) via environment variables instead of hardcoding them
+- Deployed the application to AWS, using Elastic Beanstalk for application hosting on EC2 and Amazon RDS for a managed PostgreSQL database
+- Externalized all secrets (DB credentials, JWT signing key) via environment variables/Elastic Beanstalk environment properties instead of hardcoding them
 - Maintained an incremental, well-structured Git history of 100+ commits reflecting iterative feature development
 
 ---
